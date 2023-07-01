@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7060c9f77cdc1d499970e81ec58d56e, type: 3}
+  m_Name: Axe
+  m_EditorClassIdentifier: 
+  _dropPrefab: {fileID: 5110165239779093914, guid: f97a0a9ba8e943f439d55529409e65b5, type: 3}
+  _itemPrefab: {fileID: 3300392885375025954, guid: e9db7ade99ce0df40858a40b57a0bafb, type: 3}
+  _stackable: 0
+  _degradable: 1
+  _equippable: 1
+  _name: Axe
+  _description: A stick with a metal head for cutting down trees.
+  _maxAmount: 1
+  _maxCondition: 1024
+  _icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
