@@ -12,13 +12,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7060c9f77cdc1d499970e81ec58d56e, type: 3}
   m_Name: Stick
   m_EditorClassIdentifier: 
-  _dropPrefab: {fileID: 0}
+  _dropPrefab: {fileID: 5883839819721564380, guid: dfdde3f21df3c4749bd358f0e50b5a39, type: 3}
   _itemPrefab: {fileID: 0}
   _stackable: 1
   _degradable: 0
   _equippable: 0
   _name: Stick
   _description: A thin log.
-  _maxAmount: 10
   _maxCondition: -1
+  _weight: 25
   _icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}

@@ -9,10 +9,12 @@ public class PlayerController : StateMachine, IInteractor
 	public Transform CameraHolder => _cameraHolder;
 	public PlayerControls PlayerControls => _controls;
 	public Rigidbody Rigidbody => _rigidbody;
+	public ItemHolder ItemHolder => _itemHolder;
 	public float WalkSpeed => _walkSpeed;
 	public float AirMultiplier => _airMultiplier;
 	public float JumpForce => _jumpForce;
 	public Container Inventory => _inventory;
+
 
 	#endregion
 
@@ -25,16 +27,28 @@ public class PlayerController : StateMachine, IInteractor
 	[SerializeField] Transform _cameraHolder;
 	[SerializeField] Transform _orientation;
 
+	[Space]
+
+	[SerializeField] ItemHolder _itemHolder;
+
+	[Space]
+
 	[SerializeField] Container _inventory;
+
+	[Space]
 
 	[SerializeField] float _walkSpeed;
 	[SerializeField] float _airMultiplier;
 	[SerializeField] float _speed;
 
+	[Space]
+
 	[SerializeField] float _jumpForce;
 
 	Vector2 _moveInput;
 	Vector3 _moveDirection;
+
+	[Space]
 
 	[SerializeField] LayerMask _ground;
 

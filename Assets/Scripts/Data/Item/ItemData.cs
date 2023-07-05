@@ -3,48 +3,50 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
 public class ItemData : ScriptableObject
 {
-    #region Getters
+	#region Getters
 
-    public string Name => _name;
-    public int MaxAmount => _maxAmount;
-    public int MaxCondition => _maxCondition;
-    public Sprite Icon => _icon;
+	public string Name => _name;
+	public string Description => _description;
+
+	public int MaxCondition => _maxCondition;
+	public int Weight => _weight;
+	public Sprite Icon => _icon;
 
 	public ItemPickup DropPrefab => _dropPrefab;
-	public Item ItemPrefab  => _itemPrefab;
+	public Item ItemPrefab => _itemPrefab;
 
-	public bool Stackable => _stackable;
+	public bool Stackable => _stackable && !_degradable;
 	public bool Degradable => _degradable;
 	public bool Equippable => _equippable;
 
 	#endregion
 
 	[SerializeField] ItemPickup _dropPrefab;
-    [SerializeField] Item _itemPrefab;
+	[SerializeField] Item _itemPrefab;
 
-    [Space]
+	[Space]
 
-    [SerializeField] bool _stackable;
-    [SerializeField] bool _degradable;
-    [SerializeField] bool _equippable;
+	[SerializeField] bool _stackable;
+	[SerializeField] bool _degradable;
+	[SerializeField] bool _equippable;
 
-    [Space]
+	[Space]
 
-    [SerializeField] string _name;
-    [SerializeField, TextArea(3, 10)] string _description;
+	[SerializeField] string _name;
+	[SerializeField, TextArea(3, 10)] string _description;
 
-    [Space]
+	[Space]
 
-    [SerializeField] int _maxAmount;
-    [SerializeField] int _maxCondition;
+	[SerializeField] int _maxCondition;
+	[SerializeField] int _weight;
 
-    [Space]
+	[Space]
 
-    [SerializeField] Sprite _icon;
+	[SerializeField] Sprite _icon;
 }
 public enum ItemType
 {
-    NonStackable,
-    Stackable,
-    Degradable
+	NonStackable,
+	Stackable,
+	Degradable
 }

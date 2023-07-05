@@ -15,4 +15,6 @@ public class ItemPickup : MonoBehaviour, IInteractable
 			if (_amount <= 0) Destroy(gameObject);
 		}
 	}
+
+	public void SetAmount(int amount) => _amount = amount;	
 }

@@ -21,4 +21,5 @@ MonoBehaviour:
   _description: A stick with a metal head for cutting down trees.
   _maxAmount: 1
   _maxCondition: 1024
+  _weight: 100
   _icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}

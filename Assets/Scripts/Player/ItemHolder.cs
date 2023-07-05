@@ -7,6 +7,7 @@ public class ItemHolder : MonoBehaviour
 	Container _inventory;
 
 	Dictionary<ItemData, Item> _items = new();
+	Item _equippedItem;
 
 	void Awake()
 	{
@@ -19,10 +20,21 @@ public class ItemHolder : MonoBehaviour
 		if (!item.Equippable) return;
 		if (_items.ContainsKey(item)) return;
 
-		Item newItem = Instantiate(item.ItemPrefab, transform);
-		newItem.transform.localPosition = Vector3.zero;
-		newItem.transform.localRotation = Quaternion.identity;
+		Item heldItem = Instantiate(item.ItemPrefab, transform);
+		heldItem.transform.localPosition = Vector3.zero;
+		heldItem.transform.localRotation = Quaternion.identity;
+		heldItem.Unequip();
 
-		_items.Add(item, newItem);
+		_items.Add(item, heldItem);
+	}
+
+	public void Equip(ItemData item)
+	{
+		if (!_items.TryGetValue(item, out Item heldItem)) return;
+
+		if (_equippedItem) _equippedItem.Unequip();
+
+		_equippedItem = heldItem;
+		_equippedItem.Equip();
 	}
 }

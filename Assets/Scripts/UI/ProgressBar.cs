@@ -17,10 +17,22 @@ public class ProgressBar : MonoBehaviour
 		GameObject obj = Instantiate(Resources.Load<GameObject>("UI/ProgressBar"));
 		obj.transform.SetParent(Selection.activeTransform, false);
 	}
-	[MenuItem("GameObject/UI/Radial Progress Bar")]
-	public static void CreateRadialProgressBar()
+	[MenuItem("GameObject/UI/360Radial Progress Bar")]
+	public static void Create360RadialProgressBar()
 	{
-		GameObject obj = Instantiate(Resources.Load<GameObject>("UI/RadialProgressBar"));
+		GameObject obj = Instantiate(Resources.Load<GameObject>("UI/360RadialProgressBar"));
+		obj.transform.SetParent(Selection.activeTransform, false);
+	}
+	[MenuItem("GameObject/UI/180Radial Progress Bar")]
+	public static void Create180RadialProgressBar()
+	{
+		GameObject obj = Instantiate(Resources.Load<GameObject>("UI/180RadialProgressBar"));
+		obj.transform.SetParent(Selection.activeTransform, false);
+	}
+	[MenuItem("GameObject/UI/90Radial Progress Bar")]
+	public static void Create90RadialProgressBar()
+	{
+		GameObject obj = Instantiate(Resources.Load<GameObject>("UI/90RadialProgressBar"));
 		obj.transform.SetParent(Selection.activeTransform, false);
 	}
 #endif
@@ -40,6 +52,8 @@ public class ProgressBar : MonoBehaviour
 	[Space]
 
 	[SerializeField] Image.FillMethod _fillMethod;
+	[SerializeField] Image.Origin360 _fillOrigin;
+
 	[SerializeField] TMP_Text _text;
 	[SerializeField] string _valueFormat = "{0}";
 
@@ -62,6 +76,7 @@ public class ProgressBar : MonoBehaviour
 			if (_fill != null)
 			{
 				_fill.fillMethod = _fillMethod;
+				_fill.fillOrigin = (int)_fillOrigin;
 
 				_value = Mathf.Clamp(_value, _min, _max);
 

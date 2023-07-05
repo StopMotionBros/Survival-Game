@@ -4,182 +4,146 @@ using UnityEngine.UI;
 using UnityEngine;
 using TMPro;
 
-public class UIItemSlot : Selectable, ISubmitHandler
+public class UIItemSlot : Selectable
 {
-    Container _container;
+	Container _container;
 
-    [SerializeField] Image _icon;
-    [SerializeField] TMP_Text _amount;
-    [SerializeField] ProgressBar _condition;
+	[SerializeField] TMP_Text _name;
+	[SerializeField] Image _icon;
+	[SerializeField] TMP_Text _amount;
+	[SerializeField] TMP_Text _weight;
+	[SerializeField] ProgressBar _condition;
 
-    CursorSlot _cursor;
-    
 	public SlotData Slot { get => _slot; set => _slot = value; }
-    [SerializeField] SlotData _slot;
+	[SerializeField] SlotData _slot;
 
-	public void Init(ItemData item, Container container)
-    {
-        _cursor = CursorSlot.Instance;
+	public void Init(ItemData item, Container container, int amount = 1, int condition = -1)
+	{
+		if (!item) throw new Exception("Item cannot be null");
 
-        _container = container;
-        _slot = new SlotData(item, 1, -1);
+		_container = container;
+		_slot = new SlotData(item, amount, condition);
 
-		if (item) _condition.Max = item.MaxCondition;
+		_condition.gameObject.SetActive(item.Degradable && !item.Stackable);
+		_condition.Max = item.MaxCondition;
+
+		_amount.enabled = item.Stackable;
+
+		_container.AddSlot(this);
 
 		UpdateSlot();
-    }
-
-	public void OnSubmit(BaseEventData eventData)
-	{
-		if (Swap(_cursor))
-			_cursor.transform.position = transform.position;
 	}
 
-	public override void OnPointerDown(PointerEventData eventData)
+	public override void OnSelect(BaseEventData eventData)
 	{
-		base.OnPointerDown(eventData);
+		base.OnSelect(eventData);
 
-		if (Swap(_cursor))
-		    _cursor.transform.position = transform.position;
+		_container.SelectSlot(this);
 	}
 
-	public bool Swap(UIItemSlot other)
-    {
-        return _container.Swap(this, other);
-    }
+	public bool AddItem(ItemData item, int amount, int condition = -1, bool update = true)
+	{
+		if (!item) return false;
+		if (!_slot.Item.Stackable && !_slot.Empty) return false;
 
-	public bool AddItem(ItemData item, int amount, out int remainder, int condition = -1)
-    {
-        remainder = amount;
+		if (item.Degradable)
+			if (condition < 0) condition = item.MaxCondition;
 
-        if (!item) return false;
+		if (_slot.Empty)
+		{
+			_slot.Item = item;
+			_slot.Condition = Mathf.Clamp(condition, 0, item.MaxCondition);
 
-        if (_slot.Full) return false;
-
-        if (item.Degradable)
-            if (condition == -1) condition = item.MaxCondition;
-
-        if (_slot.Empty)
-        {
-            _slot.Item = item;
-            _slot.Condition = Mathf.Clamp(condition, 0, item.MaxCondition);
-
-            if (!item.Stackable)
+			if (!item.Stackable)
 			{
-                remainder--;
 				_slot.Amount = 1;
 
-                UpdateSlot();
+				if (update) UpdateSlot();
 				return true;
-            }
-        }
+			}
+		}
 
-        if (item != _slot.Item) return false;
+		if (item != _slot.Item) return false;
 
-        bool addedItem = false;
-        if (item.Stackable)
-        {
-            if (_slot.Amount + amount <= _slot.MaxAmount)
-            {
-                remainder = 0;
-                _slot.Amount += amount;
-
-                addedItem = true;
-            }
-            else if (_slot.Amount + amount > _slot.MaxAmount)
-            {
-                remainder = remainder - _slot.MaxAmount - _slot.Amount;
-                _slot.Amount = _slot.MaxAmount;
-
-                addedItem = true;
-            }
-        }
-
-        UpdateSlot();
-        return addedItem;
-    }
-
-    public void UpdateSlot()
-    {
-        if (_slot.Empty)
-        {
-            Clear();
-
-            _icon.enabled = false;
-            _amount.enabled = false;
-            _condition.gameObject.SetActive(false);
-        }
-        else
+		bool addedItem = false;
+		if (item.Stackable)
 		{
-			if (!_icon.enabled) _icon.enabled = true;
-			if (!_amount.enabled) _amount.enabled = true;
-            if (_slot.Item.Degradable && !_condition.gameObject.activeSelf) _condition.gameObject.SetActive(true);
-			if (_condition.Max != _slot.MaxCondition) _condition.Max = _slot.MaxCondition;
-            
-            UpdateUI();
-        }
-    }
+			_slot.Amount += amount;
+		}
 
-    void UpdateUI()
-    {
-		_icon.sprite = _slot.Item.Icon;
-
-        if (_slot.Amount == 1) _amount.enabled = false;
-        else if (!_amount.enabled) _amount.enabled = true;
-		_amount.SetText(_slot.Amount.ToString());
-
-        _condition.Value = _slot.Condition;
+		if (update) UpdateSlot();
+		return addedItem;
 	}
 
-    public void Clear()
-    {
-        _slot.Clear();
-    }
+	public void Drop(int amount)
+	{
+		ItemPickup pickup = Instantiate(_slot.Item.DropPrefab, transform.root.position, Quaternion.identity);
+		pickup.SetAmount(Mathf.Min(_slot.Amount, amount));
+
+		_slot.Amount -= amount;
+
+		_container.Drop(_slot.Item, amount);
+
+		if (_slot.Amount <= 0) Clear();
+		else UpdateSlot();
+	}
+
+	public void UpdateSlot()
+	{
+		if (_slot.Empty) Clear();
+		else UpdateUI();
+	}
+
+	void UpdateUI()
+	{
+		_name.SetText(_slot.Item.Name);
+		if (_amount.enabled) _amount.SetText("(" + _slot.Amount + ")");
+		_weight.SetText(_slot.Weight + "[lbs]");
+		_condition.Value = _slot.Condition;
+	}
+
+	public void Clear()
+	{
+		_container.RemoveSlot(this);
+		Destroy(gameObject);
+	}
 }
 [Serializable]
 public struct SlotData
 {
-    public ItemData Item;
+	public ItemData Item;
 
-    public int Amount;
-    public int Condition;
+	public int Amount;
+	public int Condition;
+	public int Weight => Item ? Item.Weight * Amount : 0;
 
-    public int MaxAmount => Item.MaxAmount;
-    public int MaxCondition => Item.MaxCondition;
+	public int MaxCondition => Item.MaxCondition;
 
-    public bool Empty => Item == null || Amount <= 0;
-    public bool Full => Item != null && Amount == Item.MaxAmount;
+	public bool Empty => Item == null || Amount <= 0;
 
 	public SlotData(ItemData item, int amount, int condition)
 	{
+		if (item == null) throw new Exception("Item cannot be null.");
+
 		Item = item;
 
-        if (Item == null)
-        {
-            Amount = 0;
-            Condition = -1;
-
-            return;
-        }
-
-		Amount = Mathf.Clamp(amount, 0, item.MaxAmount);
-		Condition = Mathf.Clamp(condition, 0, item.MaxCondition);
-
+		Amount = amount;
+		Condition = Mathf.Clamp(condition, -1, item.MaxCondition);
 	}
 
-    public void Clear()
-    {
-        Item = null;
-        Amount = 0;
-        Condition = -1;
-    }
+	public void Clear()
+	{
+		Item = null;
+		Amount = 0;
+		Condition = -1;
+	}
 
-    public void Swap(SlotData other)
-    {
-        SlotData b = other;
+	public void Swap(SlotData other)
+	{
+		SlotData b = other;
 
-        Item = b.Item;
-        Amount = b.Amount;
-        Condition = b.Condition;
-    }
+		Item = b.Item;
+		Amount = b.Amount;
+		Condition = b.Condition;
+	}
 }
