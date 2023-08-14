@@ -2,6 +2,11 @@
 
 public abstract class Item : MonoBehaviour
 {
+	public ItemData Data => _data;
+
+	[SerializeField] ItemData _data;
+
+
 	public virtual void Equip()
 	{
 		gameObject.SetActive(true);

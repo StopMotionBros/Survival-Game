@@ -17,9 +17,12 @@ MonoBehaviour:
   _stackable: 0
   _degradable: 1
   _equippable: 1
+  _usable: 0
   _name: Axe
-  _description: A stick with a metal head for cutting down trees.
-  _maxAmount: 1
+  _description: "A stick with a metal \nhead for cutting down \ntrees."
   _maxCondition: 1024
-  _weight: 100
-  _icon: {fileID: 10911, guid: 0000000000000000f000000000000000, type: 0}
+  _maxStack: 0
+  _size:
+    x: 1
+    y: 2
+  _icon: {fileID: 21300000, guid: cb99eb3312243114a91fa13933e82ea7, type: 3}

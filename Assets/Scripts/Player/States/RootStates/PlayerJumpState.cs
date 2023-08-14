@@ -35,7 +35,7 @@ public class PlayerJumpState : PlayerState
 
 	public override void FixedUpdate()
 	{
-		_player.MovePlayer(_airMultiplier);
+		_player.Move(_airMultiplier);
 
 		if (_rigidbody.velocity.y <= 0) _player.SetState(_player.Fall);
 	}

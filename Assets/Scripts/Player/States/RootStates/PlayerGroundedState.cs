@@ -30,7 +30,7 @@ public class PlayerGroundedState : PlayerState
 
 	public override void FixedUpdate()
 	{
-		_player.MovePlayer();
+		_player.Move();
 
 		if (!_player.IsGrounded) _player.SetState(_player.Fall);
 	}

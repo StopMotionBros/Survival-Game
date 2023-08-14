@@ -12,7 +12,7 @@ public class CameraController : MonoBehaviour
 
 	void Awake()
 	{
-		GameManager.ToggleCursor(true);
+		GameManager.ToggleCursor(false);
 	}
 
 	void Update()

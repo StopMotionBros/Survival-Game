@@ -12,13 +12,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d7060c9f77cdc1d499970e81ec58d56e, type: 3}
   m_Name: Log
   m_EditorClassIdentifier: 
-  _dropPrefab: {fileID: 0}
+  _dropPrefab: {fileID: 1425970336004634597, guid: b58e226f122391341bc487e078a3088a, type: 3}
   _itemPrefab: {fileID: 0}
   _stackable: 0
   _degradable: 0
-  _equippable: 1
+  _equippable: 0
+  _usable: 0
   _name: Log
   _description: A big stick.
-  _maxAmount: 1
   _maxCondition: -1
-  _icon: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  _maxStack: 0
+  _size:
+    x: 5
+    y: 2
+  _icon: {fileID: 21300000, guid: 9a1e79f7255ad8149a7a7725aa542e5f, type: 3}

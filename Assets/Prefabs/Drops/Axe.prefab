@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 2276517646473264042}
   - component: {fileID: 5110165239779093914}
+  - component: {fileID: 183437029433431670}
   - component: {fileID: 4185896557889292552}
   - component: {fileID: 2979495481479884632}
   - component: {fileID: 6288023603723998498}
@@ -49,8 +50,25 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _item: {fileID: 11400000, guid: 058bcefd2c7375845922af351758047f, type: 2}
-  _amount: 24
-  _condition: 448
+  _amount: 3
+  _condition: 61
+--- !u!114 &183437029433431670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6060863014767298463}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ecb41ff5805eedd42bc07d12d9ef6288, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _floaters:
+  - {fileID: 2276517646473264042}
+  _floatingForce: 25
+  _waterDrag: 3
+  _waterAngularDrag: 1
 --- !u!33 &4185896557889292552
 MeshFilter:
   m_ObjectHideFlags: 0

@@ -27,7 +27,7 @@ public class PlayerFallState : PlayerState
 
 	public override void FixedUpdate()
 	{
-		_player.MovePlayer(_airMultiplier);
+		_player.Move(_airMultiplier);
 
 		_player.Rigidbody.AddForce(5 * Vector3.down, ForceMode.Force);
 		if (_player.IsGrounded) _player.SetState(_player.Grounded);

@@ -1,18 +1,29 @@
 using System;
+using TMPro;
+using Unity.Mathematics;
+using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
-using UnityEngine;
-using TMPro;
 
-public class UIItemSlot : Selectable
+public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
 	Container _container;
 
-	[SerializeField] TMP_Text _name;
+	[SerializeField] RectTransform _details;
 	[SerializeField] Image _icon;
 	[SerializeField] TMP_Text _amount;
-	[SerializeField] TMP_Text _weight;
 	[SerializeField] ProgressBar _condition;
+
+	public RectTransform RectTransform => _rectTransform;
+	RectTransform _rectTransform;
+
+	public int X { get; private set; }
+	public int Y { get; private set; }
+	public int Width { get; private set; }
+	public int Height { get; private set; }
+
+	public Direction2D Direction => _direction;
+	Direction2D _direction;
 
 	public SlotData Slot { get => _slot; set => _slot = value; }
 	[SerializeField] SlotData _slot;
@@ -24,25 +35,128 @@ public class UIItemSlot : Selectable
 		_container = container;
 		_slot = new SlotData(item, amount, condition);
 
+		_rectTransform = GetComponent<RectTransform>();
+		_rectTransform.sizeDelta = container.SlotSize * new Vector2(item.Size.x, item.Size.y);
+		_details.sizeDelta = _rectTransform.sizeDelta;
+
+		_icon.sprite = _slot.Item.Icon;
+
 		_condition.gameObject.SetActive(item.Degradable && !item.Stackable);
 		_condition.Max = item.MaxCondition;
 
 		_amount.enabled = item.Stackable;
-
-		_container.AddSlot(this);
-
-		UpdateSlot();
 	}
 
-	public override void OnSelect(BaseEventData eventData)
+	public void SetContainer(Container container)
 	{
-		base.OnSelect(eventData);
+		if (container == null) return;
 
-		_container.SelectSlot(this);
+		_container = container;
+		transform.SetParent(_container.SlotContainer);
 	}
 
-	public bool AddItem(ItemData item, int amount, int condition = -1, bool update = true)
+	public void SetRect(int x, int y, int width, int height)
 	{
+		X = x;
+		Y = y;
+		Width = width;
+		Height = height;
+	}
+
+	public void GetBounds(out int x, out int y, out int w, out int h)
+	{
+		_container.Grid.ToLocal(transform.position, out int posX, out int posY);
+		int width = _slot.Item.Size.x;
+		int height = _slot.Item.Size.y;
+
+		x = 0;
+		y = 0;
+		w = 0;
+		h = 0;
+
+		switch (_direction)
+		{
+			case Direction2D.North:
+				x = posX;
+				y = posY;
+				w = width;
+				h = height;
+				break;
+			case Direction2D.West:
+				x = posX;
+				y = posY;
+				w = height;
+				h = width;
+				break;
+			case Direction2D.South:
+				x = posX;
+				y = posY;
+				w = width;
+				h = height;
+				break;
+			case Direction2D.East:
+				x = posX;
+				y = posY;
+				w = height;
+				h = width;
+				break;
+		}
+	}
+
+	public void SetRotation(Direction2D direction)
+	{
+		_direction = direction;
+
+		switch(_direction)
+		{
+			case Direction2D.North:
+				_rectTransform.pivot = Vector2.zero;
+				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
+				break;
+			case Direction2D.West:
+				_rectTransform.pivot = Vector2.right;
+				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
+				break;
+			case Direction2D.South:
+				_rectTransform.pivot = Vector2.one;
+				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
+				break;
+			case Direction2D.East:
+				_rectTransform.pivot = Vector2.up;
+				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
+				break;
+		}
+
+		transform.rotation = Quaternion.Euler(0, 0, -90 * (int)_direction);
+		_details.rotation = Quaternion.identity;
+	}
+
+	public void Rotate()
+	{
+		_direction = (Direction2D)((1 + (int)_direction) % 4);
+		SetRotation(_direction);
+	}
+
+	public void OnPointerDown(PointerEventData eventData)
+	{
+		if (eventData.button == PointerEventData.InputButton.Left) _container.SelectSlot(this);
+		if (eventData.button == PointerEventData.InputButton.Right) _container.RightClickSlot(this);
+	}
+
+	public void OnPointerEnter(PointerEventData eventData)
+	{
+		_container.HoverSlot(this);
+	}
+
+	public void OnPointerExit(PointerEventData eventData)
+	{
+		_container.StopHoverSlot(this);
+	}
+
+	public bool AddItem(ItemData item, int amount, out int remainder, int condition = -1)
+	{
+		remainder = amount;
+
 		if (!item) return false;
 		if (!_slot.Item.Stackable && !_slot.Empty) return false;
 
@@ -52,40 +166,77 @@ public class UIItemSlot : Selectable
 		if (_slot.Empty)
 		{
 			_slot.Item = item;
-			_slot.Condition = Mathf.Clamp(condition, 0, item.MaxCondition);
+			_slot.Condition = math.clamp(condition, 0, item.MaxCondition);
 
 			if (!item.Stackable)
 			{
+				remainder -= 1;
 				_slot.Amount = 1;
 
-				if (update) UpdateSlot();
+				UpdateSlot();
 				return true;
 			}
 		}
 
 		if (item != _slot.Item) return false;
 
-		bool addedItem = false;
-		if (item.Stackable)
+		bool addedItem;
+		
+		if (_slot.Amount == item.MaxStack) addedItem = false;
+		else if (_slot.Amount + amount > item.MaxStack)
 		{
+			remainder = _slot.Amount + amount - item.MaxStack;
+			_slot.Amount = item.MaxStack;
+			addedItem = true;
+		}
+		else
+		{
+			remainder = 0;
 			_slot.Amount += amount;
+			addedItem = true;
 		}
 
-		if (update) UpdateSlot();
-		return addedItem;
+		if (addedItem)
+		{
+			UpdateSlot();
+			return true;
+		}
+		return false;
 	}
 
-	public void Drop(int amount)
+	public bool RemoveItem(int amount, out int remainder)
 	{
-		ItemPickup pickup = Instantiate(_slot.Item.DropPrefab, transform.root.position, Quaternion.identity);
-		pickup.SetAmount(Mathf.Min(_slot.Amount, amount));
+		remainder = amount;
 
-		_slot.Amount -= amount;
+		if (_slot.Empty) return false;
 
-		_container.Drop(_slot.Item, amount);
+		if(_slot.Amount - amount >= 0)
+		{
+			remainder = 0;
+			_slot.Amount -= amount;
+		}
+		else
+		{
+			remainder = _slot.Amount - remainder;
+			_slot.Amount = 0;
+		}
 
-		if (_slot.Amount <= 0) Clear();
-		else UpdateSlot();
+		UpdateSlot();
+		return true;
+	}
+
+	public bool Drop(int amount, Vector3 position, out int remainder)
+	{
+		if (!RemoveItem(amount, out remainder)) return false;
+		
+		int amt = amount - remainder;
+
+		ItemPickup pickup = Instantiate(_slot.Item.DropPrefab, position, Quaternion.identity);
+		pickup.SetAmount(math.min(_slot.Amount, amt));
+
+		UpdateSlot();
+		return true;
+		
 	}
 
 	public void UpdateSlot()
@@ -96,15 +247,13 @@ public class UIItemSlot : Selectable
 
 	void UpdateUI()
 	{
-		_name.SetText(_slot.Item.Name);
 		if (_amount.enabled) _amount.SetText("(" + _slot.Amount + ")");
-		_weight.SetText(_slot.Weight + "[lbs]");
 		_condition.Value = _slot.Condition;
 	}
 
 	public void Clear()
 	{
-		_container.RemoveSlot(this);
+		_container.DisconnectSlot(this);
 		Destroy(gameObject);
 	}
 }
@@ -115,9 +264,6 @@ public struct SlotData
 
 	public int Amount;
 	public int Condition;
-	public int Weight => Item ? Item.Weight * Amount : 0;
-
-	public int MaxCondition => Item.MaxCondition;
 
 	public bool Empty => Item == null || Amount <= 0;
 

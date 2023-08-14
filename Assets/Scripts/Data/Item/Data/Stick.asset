@@ -20,5 +20,9 @@ MonoBehaviour:
   _name: Stick
   _description: A thin log.
   _maxCondition: -1
+  _maxStack: 15
   _weight: 25
-  _icon: {fileID: 10901, guid: 0000000000000000f000000000000000, type: 0}
+  _size:
+    x: 1
+    y: 2
+  _icon: {fileID: 21300000, guid: 4085baa3cf3e97a48b72a4237c734062, type: 3}

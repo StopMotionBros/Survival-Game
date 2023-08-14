@@ -1,3 +1,4 @@
+using Unity.Mathematics;
 using UnityEngine;
 
 [CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
@@ -9,7 +10,9 @@ public class ItemData : ScriptableObject
 	public string Description => _description;
 
 	public int MaxCondition => _maxCondition;
-	public int Weight => _weight;
+	public int MaxStack => _maxStack;
+	public int2 Size => _size;
+
 	public Sprite Icon => _icon;
 
 	public ItemPickup DropPrefab => _dropPrefab;
@@ -18,6 +21,7 @@ public class ItemData : ScriptableObject
 	public bool Stackable => _stackable && !_degradable;
 	public bool Degradable => _degradable;
 	public bool Equippable => _equippable;
+	public bool Usable => _usable;
 
 	#endregion
 
@@ -29,6 +33,7 @@ public class ItemData : ScriptableObject
 	[SerializeField] bool _stackable;
 	[SerializeField] bool _degradable;
 	[SerializeField] bool _equippable;
+	[SerializeField] bool _usable;
 
 	[Space]
 
@@ -38,7 +43,9 @@ public class ItemData : ScriptableObject
 	[Space]
 
 	[SerializeField] int _maxCondition;
-	[SerializeField] int _weight;
+	[SerializeField] int _maxStack;
+
+	[SerializeField] int2 _size;
 
 	[Space]
 
