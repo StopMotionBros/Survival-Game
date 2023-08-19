@@ -6,7 +6,7 @@ TagManager:
   tags:
   - Interactable
   - Water
-  - Container
+  - Inventory
   layers:
   - Default
   - TransparentFX

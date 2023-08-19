@@ -16,5 +16,6 @@ public class ItemPickup : MonoBehaviour, IInteractable
 		}
 	}
 
-	public void SetAmount(int amount) => _amount = amount;	
+	public void SetAmount(int amount) => _amount = amount;
+	public void SetCondition(int condition) => _condition = condition;
 }

@@ -4,7 +4,7 @@ using UnityEngine;
 public class ContextMenu : MonoBehaviour
 {
 	[SerializeField] PlayerController _player;
-	[SerializeField] Container _container;
+	[SerializeField] Inventory _inventory;
 	[SerializeField] Slider _dropAmount;
 
 	[SerializeField] GameObject _dropModal;
@@ -14,9 +14,9 @@ public class ContextMenu : MonoBehaviour
 	[Space]
 
 	[SerializeField] GameObject _equipButton;
+	[SerializeField] GameObject _unequipButton;
 	[SerializeField] GameObject _useButton;
 	[SerializeField] GameObject _assignButton;
-	[SerializeField] GameObject _combineButton;
 
 	UIItemSlot _selectedSlot;
 
@@ -26,7 +26,8 @@ public class ContextMenu : MonoBehaviour
 		ItemData item = _selectedSlot.Slot.Item;
 		transform.position = Input.mousePosition;
 
-		_equipButton.SetActive(item.Equippable);
+		_equipButton.SetActive(item.Equippable && !_player.ItemHolder.IsSlotEquipped(_selectedSlot));
+		_unequipButton.SetActive(item.Equippable && _player.ItemHolder.IsSlotEquipped(_selectedSlot));
 		_useButton.SetActive(item.Usable);
 		_assignButton.SetActive(item.Equippable || item.Usable);
 
@@ -40,9 +41,11 @@ public class ContextMenu : MonoBehaviour
 		Toggle(false);
 	}
 
-	public void EnterCraftingMode()
+	public void Unequip()
 	{
-
+		if (!_selectedSlot) return;
+		_player.ItemHolder.Unequip();
+		Toggle(false);
 	}
 
 	public void ToggleDropModal(bool enabled)
@@ -60,9 +63,9 @@ public class ContextMenu : MonoBehaviour
 	public void Drop()
 	{
 		if (!_selectedSlot) return;
-		if (_container.Drop(_selectedSlot, (int)_dropAmount.value))
+		if (_inventory.Drop(_selectedSlot, (int)_dropAmount.value))
 		{
-			if (_player.ItemHolder.IsItemEquipped(_selectedSlot)) _player.ItemHolder.Unequip();
+			if (_player.ItemHolder.IsSlotEquipped(_selectedSlot)) _player.ItemHolder.Unequip();
 		}
 		_selectedSlot = null;
 		ToggleDropModal(false);

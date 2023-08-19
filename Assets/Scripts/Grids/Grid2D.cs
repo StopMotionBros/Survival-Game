@@ -132,6 +132,7 @@ public class Grid2D<T>
 	public Vector2 GetRandomCellPos() => 
 		GetCellPosLocal(UnityEngine.Random.Range(0, Width), UnityEngine.Random.Range(0, Height));
 
+#if UNITY_EDITOR
 	public void DrawGrid(Color color, Color nullColor)
 	{
 		Gizmos.color = color;
@@ -171,4 +172,5 @@ public class Grid2D<T>
 
 		Handles.Label(position, text, style);
 	}
+#endif
 }

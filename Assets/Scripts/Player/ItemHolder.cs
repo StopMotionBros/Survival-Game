@@ -32,6 +32,7 @@ public class ItemHolder : MonoBehaviour
 		Item heldItem = Instantiate(item.ItemPrefab, transform);
 		heldItem.transform.localPosition = Vector3.zero;
 		heldItem.transform.localRotation = Quaternion.identity;
+		heldItem.Initialize(_player, slot);
 		heldItem.Unequip();
 
 		_items.Add(slot, heldItem);
@@ -40,7 +41,12 @@ public class ItemHolder : MonoBehaviour
 	void RemoveItem(UIItemSlot slot)
 	{
 		if (!slot) return;
-		if (_equippedSlot == slot) Unequip();
+		if (_equippedSlot == slot)
+		{
+			Unequip();
+			_equippedSlot = _inventory.Inventory.FindSlotWithItem(slot.Slot.Item);
+			if (_equippedSlot) Equip(_equippedSlot);
+		}
 		_items.Remove(slot);
 	}
 
@@ -48,11 +54,12 @@ public class ItemHolder : MonoBehaviour
 	{
 		if (!_items.TryGetValue(slot, out Item heldItem)) return;
 
-		if (_equippedItem) _equippedItem.Unequip();
+		if (_equippedItem) Unequip();
 
 		_equippedItem = heldItem;
 		_equippedSlot = slot;
 		_equippedItem.Equip();
+		_equippedSlot.Equip();
 	}
 
 	public void Unequip()
@@ -60,10 +67,11 @@ public class ItemHolder : MonoBehaviour
 		if (!_equippedItem) return;
 
 		_equippedItem.Unequip();
+		_equippedSlot.Unequip();
 		_equippedItem = null;
 		_equippedSlot = null;
 	}
 
 	public bool IsItemEquipped(ItemData item) => _equippedItem == null ? false : _equippedItem.Data == item;
-	public bool IsItemEquipped(UIItemSlot slot) => _equippedSlot == slot;
+	public bool IsSlotEquipped(UIItemSlot slot) => _equippedSlot == slot;
 }

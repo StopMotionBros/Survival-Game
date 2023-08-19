@@ -7,12 +7,14 @@ using UnityEngine.UI;
 
 public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandler, IPointerExitHandler
 {
-	Container _container;
+	Inventory _inventory;
 
 	[SerializeField] RectTransform _details;
 	[SerializeField] Image _icon;
 	[SerializeField] TMP_Text _amount;
 	[SerializeField] ProgressBar _condition;
+
+	[SerializeField] Image _background;
 
 	public RectTransform RectTransform => _rectTransform;
 	RectTransform _rectTransform;
@@ -28,15 +30,15 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 	public SlotData Slot { get => _slot; set => _slot = value; }
 	[SerializeField] SlotData _slot;
 
-	public void Init(ItemData item, Container container, int amount = 1, int condition = -1)
+	public void Init(ItemData item, Inventory inventory, int amount = 1, int condition = -1)
 	{
 		if (!item) throw new Exception("Item cannot be null");
 
-		_container = container;
+		_inventory = inventory;
 		_slot = new SlotData(item, amount, condition);
 
 		_rectTransform = GetComponent<RectTransform>();
-		_rectTransform.sizeDelta = container.SlotSize * new Vector2(item.Size.x, item.Size.y);
+		_rectTransform.sizeDelta = inventory.SlotSize * new Vector2(item.Size.x, item.Size.y);
 		_details.sizeDelta = _rectTransform.sizeDelta;
 
 		_icon.sprite = _slot.Item.Icon;
@@ -47,12 +49,12 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 		_amount.enabled = item.Stackable;
 	}
 
-	public void SetContainer(Container container)
+	public void SetContainer(Inventory inventory)
 	{
-		if (container == null) return;
+		if (inventory == null) return;
 
-		_container = container;
-		transform.SetParent(_container.SlotContainer);
+		_inventory = inventory;
+		transform.SetParent(_inventory.SlotContainer);
 	}
 
 	public void SetRect(int x, int y, int width, int height)
@@ -65,7 +67,7 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
 	public void GetBounds(out int x, out int y, out int w, out int h)
 	{
-		_container.Grid.ToLocal(transform.position, out int posX, out int posY);
+		_inventory.Grid.ToLocal(transform.position, out int posX, out int posY);
 		int width = _slot.Item.Size.x;
 		int height = _slot.Item.Size.y;
 
@@ -111,19 +113,19 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 		{
 			case Direction2D.North:
 				_rectTransform.pivot = Vector2.zero;
-				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
+				_details.sizeDelta = _inventory.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
 				break;
 			case Direction2D.West:
 				_rectTransform.pivot = Vector2.right;
-				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
+				_details.sizeDelta = _inventory.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
 				break;
 			case Direction2D.South:
 				_rectTransform.pivot = Vector2.one;
-				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
+				_details.sizeDelta = _inventory.SlotSize * new Vector2(Slot.Item.Size.x, Slot.Item.Size.y);
 				break;
 			case Direction2D.East:
 				_rectTransform.pivot = Vector2.up;
-				_details.sizeDelta = _container.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
+				_details.sizeDelta = _inventory.SlotSize * new Vector2(Slot.Item.Size.y, Slot.Item.Size.x);
 				break;
 		}
 
@@ -139,19 +141,15 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
 	public void OnPointerDown(PointerEventData eventData)
 	{
-		if (eventData.button == PointerEventData.InputButton.Left) _container.SelectSlot(this);
-		if (eventData.button == PointerEventData.InputButton.Right) _container.RightClickSlot(this);
+		if (eventData.button == PointerEventData.InputButton.Left) _inventory.SelectSlot(this);
+		if (eventData.button == PointerEventData.InputButton.Right) _inventory.RightClickSlot(this);
 	}
 
-	public void OnPointerEnter(PointerEventData eventData)
-	{
-		_container.HoverSlot(this);
-	}
+	public void OnPointerEnter(PointerEventData eventData) => _inventory.HoverSlot(this);
+	public void OnPointerExit(PointerEventData eventData) => _inventory.StopHoverSlot(this);
 
-	public void OnPointerExit(PointerEventData eventData)
-	{
-		_container.StopHoverSlot(this);
-	}
+	public void Equip() => _background.color = new Color(0, 1, 0, 0.15f);
+	public void Unequip() => _background.color = new Color(0.5f, 0.5f, 0.5f, 0.07f);
 
 	public bool AddItem(ItemData item, int amount, out int remainder, int condition = -1)
 	{
@@ -217,7 +215,7 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 		}
 		else
 		{
-			remainder = _slot.Amount - remainder;
+			remainder = amount - _slot.Amount;
 			_slot.Amount = 0;
 		}
 
@@ -233,6 +231,7 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
 		ItemPickup pickup = Instantiate(_slot.Item.DropPrefab, position, Quaternion.identity);
 		pickup.SetAmount(math.min(_slot.Amount, amt));
+		pickup.SetCondition(_slot.Condition);
 
 		UpdateSlot();
 		return true;
@@ -241,7 +240,7 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
 	public void UpdateSlot()
 	{
-		if (_slot.Empty) Clear();
+		if (_slot.Empty || _slot.Broken) Clear();
 		else UpdateUI();
 	}
 
@@ -253,8 +252,54 @@ public class UIItemSlot : MonoBehaviour, IPointerDownHandler, IPointerEnterHandl
 
 	public void Clear()
 	{
-		_container.DisconnectSlot(this);
+		_inventory.DisconnectSlot(this);
 		Destroy(gameObject);
+	}
+
+	public void Damage(int damage)
+	{
+		_slot.Condition -= damage;
+		UpdateSlot();
+	}
+
+	public void IncreaseAmount(int amount = 1) => IncreaseAmount(amount, out _);
+	public void IncreaseAmount(int amount, out int remainder)
+	{
+		remainder = amount;
+		if (amount <= 0) return;
+
+		if(_slot.Amount + amount > _slot.Item.MaxStack)
+		{
+			remainder = amount - _slot.Amount;
+			_slot.Amount = _slot.Item.MaxStack;
+		}
+		else
+		{
+			remainder = 0;
+			_slot.Amount += amount;
+		}
+
+		UpdateSlot();
+	}
+
+	public void DecreaseAmount(int amount = 1) => DecreaseAmount(amount, out _);
+	public void DecreaseAmount(int amount, out int remainder)
+	{
+		remainder = amount;
+		if (amount <= 0) return;
+
+		if (_slot.Amount - amount >= 0)
+		{
+			remainder = amount - _slot.Amount;
+			_slot.Amount = 0;
+		}
+		else
+		{
+			remainder = 0;
+			_slot.Amount -= amount;
+		}
+
+		UpdateSlot();
 	}
 }
 [Serializable]
@@ -266,6 +311,7 @@ public struct SlotData
 	public int Condition;
 
 	public bool Empty => Item == null || Amount <= 0;
+	public bool Broken => Item.Degradable && Condition <= 0;
 
 	public SlotData(ItemData item, int amount, int condition)
 	{

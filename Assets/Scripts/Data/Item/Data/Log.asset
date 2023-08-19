@@ -13,10 +13,10 @@ MonoBehaviour:
   m_Name: Log
   m_EditorClassIdentifier: 
   _dropPrefab: {fileID: 1425970336004634597, guid: b58e226f122391341bc487e078a3088a, type: 3}
-  _itemPrefab: {fileID: 0}
+  _itemPrefab: {fileID: 1137714139015172351, guid: 6dd178e24dedb604f83855f726ff2915, type: 3}
   _stackable: 0
   _degradable: 0
-  _equippable: 0
+  _equippable: 1
   _usable: 0
   _name: Log
   _description: A big stick.

@@ -132,7 +132,7 @@ MonoBehaviour:
     serializedVersion: 2
     rgba: 4294967295
   m_fontSize: 17.9
-  m_fontSizeBase: 36
+  m_fontSizeBase: 18
   m_fontWeight: 400
   m_enableAutoSizing: 1
   m_fontSizeMin: 0
@@ -287,7 +287,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 1, y: 0}
   m_AnchoredPosition: {x: 0, y: 10}
-  m_SizeDelta: {x: -20, y: 20}
+  m_SizeDelta: {x: -20, y: 10}
   m_Pivot: {x: 0.5, y: 0}
 --- !u!114 &35741939993440930
 MonoBehaviour:
@@ -646,7 +646,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 0.07058824}
+  m_Color: {r: 0.5849056, g: 0.5849056, b: 0.5849056, a: 0.078431375}
   m_RaycastTarget: 1
   m_RaycastPadding: {x: 0, y: 0, z: 0, w: 0}
   m_Maskable: 1
@@ -679,6 +679,7 @@ MonoBehaviour:
   _icon: {fileID: 173110439465198044}
   _amount: {fileID: 239249098025527172}
   _condition: {fileID: 35741939993440930}
+  _background: {fileID: 4629980989621055721}
   _slot:
     Item: {fileID: 0}
     Amount: 0
