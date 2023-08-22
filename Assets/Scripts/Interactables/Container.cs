@@ -4,18 +4,18 @@ using UnityEngine.InputSystem;
 public class Container : MonoBehaviour, IInteractable
 {
 	[SerializeField] Inventory _inventory;
-	PlayerController _player;
+	Player _player;
 
 	void Start()
 	{
-		_player = PlayerController.Instance;
+		_player = Player.Instance;
 		SubscribeInputs();
 	}
 
 	#region Input Setup
 	void OnEnable()
 	{
-		if (_player?.PlayerControls == null) return;
+		if (_player?.Controls == null) return;
 
 		SubscribeInputs();
 	}
@@ -27,19 +27,21 @@ public class Container : MonoBehaviour, IInteractable
 
 	void SubscribeInputs()
 	{
-		_player.PlayerControls.UI.ToggleInventory.performed += Close;
+		_player.Controls.UI.ToggleInventory.performed += Close;
 	}
 
 	void UnsubscribeInputs()
 	{
-		_player.PlayerControls.UI.ToggleInventory.performed -= Close;
+		_player.Controls.UI.ToggleInventory.performed -= Close;
 	}
 	#endregion
 
 	public void Interact(IInteractor interactor)
 	{
+		if (interactor.GetType() != typeof(Player)) return;
+
 		_inventory.gameObject.SetActive(true);
-		_player.Inventory.ToggleInventory(true);
+		(interactor as Player).Inventory.ToggleInventory(true);
 	}
 
 	void Close(InputAction.CallbackContext context)

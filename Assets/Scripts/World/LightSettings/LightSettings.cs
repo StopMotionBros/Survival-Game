@@ -1,16 +1,11 @@
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Light Settings", menuName = "Lighting/Light Settings")]
+[CreateAssetMenu(fileName = "Light Settings", menuName = "Settings/Lighting")]
 public class LightSettings : ScriptableObject
 {
-    [SerializeField] Gradient _skyColor;
-    [SerializeField] AnimationCurve _skyPower;
-    
-    [SerializeField] Gradient _horrizonColor;
-
-    [SerializeField] AnimationCurve _voidPower;
-    [SerializeField] Gradient _voidColor;
+    public Gradient SunColor => _sunColor;
+    public Gradient AmbientLight => _ambientLight;
 
     [SerializeField] Gradient _sunColor;
-    [SerializeField] AnimationCurve _sunIntensity;
+    [SerializeField] Gradient _ambientLight;
 }

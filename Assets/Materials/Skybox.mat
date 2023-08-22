@@ -75,15 +75,17 @@ Material:
     m_Ints: []
     m_Floats:
     - _AtmosphereThickness: 1
-    - _CloudCutoff: 15
-    - _CloudDensity: 0.3
+    - _CloudCutoff: 5
+    - _CloudDensity: 0.425
     - _CloudDistance: 0.8
+    - _CloudFalloff: 1
     - _CloudFarTiling: 0.3
-    - _CloudIntensity: 1.4
+    - _CloudIntensity: 0.3
+    - _CloudScale: 5
     - _CloudSize: 5
     - _CloudSpeed: 0.1
     - _CloudTiling: 0.1
-    - _EnableClouds: 0
+    - _EnableClouds: 1
     - _Exposure: 1.3
     - _HorrizonPower: 1
     - _HorrizonSize: 1
@@ -99,6 +101,7 @@ Material:
     - _QueueOffset: 0
     - _SkyIntensity: 1
     - _SkyIntensityNight: 1
+    - _SkyIntsensity: 1
     - _SkyPower: 1
     - _SkyPowerNight: 1
     - _StarExposure: 1.5
@@ -117,10 +120,11 @@ Material:
     - _VoidPower: 1
     - _VoidPowerNight: 1
     m_Colors:
+    - _CloudColor: {r: 1, g: 1, b: 1, a: 1}
     - _GroundColor: {r: 0.36899996, g: 0.34899998, b: 0.34099993, a: 1}
     - _HorrizonColor: {r: 0.48490566, g: 1, b: 1, a: 1}
     - _HorrizonColorNight: {r: 0, g: 0, b: 0.40392157, a: 1}
-    - _MoonDirection: {r: 0.756689, g: 0.5923976, b: 0.27656204, a: 0}
+    - _MoonDirection: {r: -0.46252578, g: 0.87096906, b: -0.16577953, a: 0}
     - _SkyColor: {r: 0, g: 0, b: 0, a: 1}
     - _SkyColorNight: {r: 0, g: 0, b: 0.15686277, a: 1}
     - _SkyTint: {r: 0.5, g: 0.5, b: 0.5, a: 1}

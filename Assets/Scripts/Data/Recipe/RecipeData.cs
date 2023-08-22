@@ -1,7 +1,7 @@
 using System;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "Recipe", menuName = "Crafting/Recipe")]
+[CreateAssetMenu(fileName = "Recipe", menuName = "Data/Recipe")]
 public class RecipeData : ScriptableObject
 {
     public Ingredient[] Ingredients => _ingredients;

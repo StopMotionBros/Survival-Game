@@ -1,7 +1,7 @@
 using Unity.Mathematics;
 using UnityEngine;
 
-[CreateAssetMenu(fileName = "New Item", menuName = "Inventory/Item")]
+[CreateAssetMenu(fileName = "New Item", menuName = "Data/Item")]
 public class ItemData : ScriptableObject
 {
 	#region Getters

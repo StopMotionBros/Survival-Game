@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 
 public class CameraController : MonoBehaviour
 {
-	[SerializeField] PlayerController _player;
+	[SerializeField] Player _player;
 	[SerializeField] Transform _orientation;
     [SerializeField] float _sensitivity;
 
@@ -23,8 +23,8 @@ public class CameraController : MonoBehaviour
 		_xRot = Mathf.Clamp(_xRot, -90, 90);
 
 		_orientation.Rotate(_mouseDelta.x * Vector3.up);
-		transform.localRotation = Quaternion.Euler(_xRot, 0, 0);
+		transform.localRotation = Quaternion.Euler(_xRot - 18, 0, 0);
 	}
 
-	Vector2 GetMouseDelta() => _player.PlayerControls.Camera.Delta.ReadValue<Vector2>();
+	Vector2 GetMouseDelta() => _player.Controls.Camera.Delta.ReadValue<Vector2>();
 }

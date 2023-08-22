@@ -4,7 +4,7 @@ using UnityEngine.InputSystem;
 public class InteractionManager : MonoBehaviour
 {
 	[SerializeField] float _interactDistance;
-	[SerializeField] PlayerController _player;
+	[SerializeField] Player _player;
 
 	[SerializeField] LayerMask _interactable;
 
@@ -12,7 +12,7 @@ public class InteractionManager : MonoBehaviour
 
 	void Start()
 	{
-		_cameraHolder = _player.CameraHolder;
+		_cameraHolder = _player.Controller.CameraHolder;
 
 		SubscribeInputs();
 	}
@@ -20,7 +20,7 @@ public class InteractionManager : MonoBehaviour
 	#region Input Setup
 	void OnEnable()
 	{
-		if (_player.PlayerControls == null) return;
+		if (_player.Controls == null) return;
 
 		SubscribeInputs();
 	}
@@ -32,12 +32,12 @@ public class InteractionManager : MonoBehaviour
 
 	void SubscribeInputs()
 	{
-		_player.PlayerControls.Interaction.Interact.performed += Interact;
+		_player.Controls.Interaction.Interact.performed += Interact;
 	}
 
 	void UnsubscribeInputs()
 	{
-		_player.PlayerControls.Interaction.Interact.performed -= Interact;
+		_player.Controls.Interaction.Interact.performed -= Interact;
 	}
 	#endregion
 

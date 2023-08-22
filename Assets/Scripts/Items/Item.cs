@@ -1,16 +1,18 @@
 ﻿using UnityEngine;
 
-public abstract class Item : MonoBehaviour
+public class Item : MonoBehaviour
 {
 	public ItemData Data => _data;
 	[SerializeField] protected ItemData _data;
 
 	protected UIItemSlot _slot;
-	protected PlayerController _player;
+	protected Player _player;
 
 	protected bool _equipped;
 
-	public void Initialize(PlayerController player, UIItemSlot slot)
+	protected string[] _extraData;
+
+	public void Initialize(Player player, UIItemSlot slot)
 	{
 		_player = player;
 		_slot = slot;
@@ -34,4 +36,5 @@ public abstract class Item : MonoBehaviour
 	public void DecreaseAmount(int amount = 1) => _slot.DecreaseAmount(amount);
 
 	protected virtual void OnInitialize() { }
+	public void AsignData(string[] data) { _extraData = data; }
 }

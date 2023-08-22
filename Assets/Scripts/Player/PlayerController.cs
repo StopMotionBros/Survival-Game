@@ -1,168 +1,168 @@
+using System;
+using Cysharp.Threading.Tasks;
+using KinematicCharacterController;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
-public class PlayerController : StateMachine, IInteractor
+public class PlayerController : MonoBehaviour, ICharacterController
 {
-	public static PlayerController Instance;
-
-	#region Getters
-
-	public Transform Tranform => _transform;
-
-	public Transform CameraHolder => _cameraHolder;
-	public PlayerControls PlayerControls => _controls;
-	public Transform Orientation => _orientation;
-	public Rigidbody Rigidbody => _rigidbody;
-	public CapsuleCollider Collider => _collider;
-	public ItemHolder ItemHolder => _itemHolder;
-
-	public float WalkSpeed => _walkSpeed;
-	public float AirMultiplier => _airMultiplier;
-	public float JumpForce => _jumpForce;
-	public float SwimSpeed => _swimSpeed;
-
-	public LayerMask Ground => _ground;
-	public PlayerInventory Inventory => _inventory;
-
-
-	#endregion
+	[SerializeField] KinematicCharacterMotor _motor;
+	[SerializeField] Player _player;
 
 	Transform _transform;
 
-	PlayerControls _controls;
+	public Transform Orientation => _orientation;
+	public Transform CameraHolder;
 
-	[SerializeField] Rigidbody _rigidbody;
-	[SerializeField] CapsuleCollider _collider;
-	[SerializeField] Transform _cameraHolder;
+	public PlayerBaseState BaseState => _baseState;
+	public PlayerMovementState MovementState => _movementState;
+
 	[SerializeField] Transform _orientation;
+	[SerializeField] Rigidbody _rigidbody;
 
-	[Space]
-
-	[SerializeField] ItemHolder _itemHolder;
-
-	[Space]
-
-	[SerializeField] PlayerInventory _inventory;
-
-	[Space]
+	[SerializeField] PlayerBaseState _baseState;
+	[SerializeField] PlayerMovementState _movementState;
 
 	[SerializeField] float _walkSpeed;
-	[SerializeField] float _airMultiplier;
-	[SerializeField] float _swimSpeed;
-	[SerializeField] float _speed;
-
-	[SerializeField] float _maxSlopeAngle;
-	
-	[Space]
+	[SerializeField] float _runSpeed;
+	[SerializeField] float _airSpeed;
 
 	[SerializeField] float _jumpForce;
 
-	Vector2 _moveInput;
-	Vector3 _moveDirection;
+	[SerializeField] Vector3 _gravity;
 
-	[Space]
+	Vector3 _velocity;
 
-	[SerializeField] LayerMask _ground;
-
-	float _radius;
-
-	bool _inWater;
-
-	public bool IsGrounded => Physics.CheckSphere(_transform.position, 0.2f, _ground);
-
-	public PlayerGroundedState Grounded;
-	public PlayerJumpState Jump;
-	public PlayerFallState Fall;
-	public PlayerSwimState Swim;
-
-	public PlayerIdleState Idle;
-	public PlayerWalkState Walk;
+	bool _jumping;
 
 	void Awake()
 	{
-		Instance = this;
-
+		_motor.CharacterController = this;
 		_transform = transform;
-
-		_controls = new PlayerControls();
-		_controls.Enable();
-
-		Grounded = new PlayerGroundedState(this);
-		Jump = new PlayerJumpState(this);
-		Fall = new PlayerFallState(this);
-		Swim = new PlayerSwimState(this);
-
-		Idle = new PlayerIdleState(this);
-		Walk = new PlayerWalkState(this);
-
-		SetState(Grounded);
-
-		_radius = _collider.radius;
 	}
 
-	void Update()
+	#region Input Setup
+	void OnEnable()
 	{
-		CurrentState.UpdateStates();
+		if (_player.Controls == null) return;
 
-		if (_inWater)
+		SubscribeInputs();
+	}
+
+	void OnDisable()
+	{
+		UnsubscribeInputs();
+	}
+
+	void SubscribeInputs()
+	{
+		_player.Controls.Movement.Run.started += StartRun;
+		_player.Controls.Movement.Run.canceled += StopRun;
+		_player.Controls.Movement.Crouch.started += StartCrouch;
+		_player.Controls.Movement.Crouch.canceled += StopCrouch;
+
+		_player.Controls.Movement.Jump.started += Jump;
+	}
+
+	void UnsubscribeInputs()
+	{
+		_player.Controls.Movement.Run.started -= StartRun;
+		_player.Controls.Movement.Run.canceled -= StopRun;
+		_player.Controls.Movement.Crouch.started -= StartCrouch;
+		_player.Controls.Movement.Crouch.canceled -= StopCrouch;
+
+		_player.Controls.Movement.Jump.started -= Jump;
+	}
+	#endregion
+
+	public void UpdateRotation(ref Quaternion currentRotation, float deltaTime)
+	{
+		currentRotation = _transform.rotation;
+	}
+
+	public void UpdateVelocity(ref Vector3 currentVelocity, float deltaTime)
+	{
+		Vector2 moveInput = GetMoveInput();
+		Vector3 moveDirection = moveInput.x * _orientation.right + moveInput.y * _orientation.forward;
+		if(_motor.GroundingStatus.IsStableOnGround)
 		{
-			if(!IsGrounded)
+			float speed = 0;
+			switch (_movementState)
 			{
-				if (CurrentState != Swim) SetState(Swim);
+				case PlayerMovementState.Walking:
+					speed = _walkSpeed;
+					break;
+				case PlayerMovementState.Running:
+					speed = _runSpeed;
+					break;
 			}
-			else
+
+			currentVelocity = speed * moveDirection;
+
+			if (_jumping)
 			{
-				if (CurrentState != Grounded) SetState(Grounded);
+				_motor.ForceUnground();
+
+				currentVelocity += _jumpForce * _motor.GroundingStatus.GroundNormal;
+				_jumping = false;
 			}
 		}
-	}
-
-	void FixedUpdate()
-	{
-		CurrentState.FixedUpdate();
-	}
-
-	public void Move(float multiplier = 1, bool ignoreSlopes = false)
-	{
-		_moveInput = GetMoveInput();
-		_moveDirection = _moveInput.x * _orientation.right + _moveInput.y * _orientation.forward;
-
-		bool onSlope = false;
-		RaycastHit hit = new RaycastHit();
-		if (!ignoreSlopes)
-		{
-			Vector3 position = transform.position + _radius * _moveDirection + (_radius * Vector3.up);
-			bool raycast = Physics.Raycast(position, Vector3.down, out hit, _radius, _ground);
-			if (raycast)
-			{
-				float angle = Vector3.Angle(hit.normal, Vector3.up);
-				onSlope = angle <= _maxSlopeAngle && angle > 5;
-			}
-			Debug.DrawLine(position, position + _radius * Vector3.down);
-		}
-
-		_rigidbody.useGravity = !onSlope;
-		if (!onSlope) _rigidbody.AddForce(_speed * multiplier * Time.deltaTime * _moveDirection, ForceMode.Force);
 		else
 		{
-			_rigidbody.AddForce(_speed * multiplier * Time.deltaTime * Vector3.ProjectOnPlane(_moveDirection, hit.normal), ForceMode.Force);
+			currentVelocity += _airSpeed * moveDirection;
+			currentVelocity += deltaTime * _gravity;
 		}
+
+		_velocity = currentVelocity;
 	}
 
-	public Vector2 GetMoveInput() => _controls.Movement.Movement.ReadValue<Vector2>();
+	void StartRun(InputAction.CallbackContext context) => _movementState = PlayerMovementState.Running;
+	void StopRun(InputAction.CallbackContext context) => _movementState = PlayerMovementState.Walking;
 
-	public void SetSpeed(float speed) => _speed = speed;
+	void StartCrouch(InputAction.CallbackContext context) => _baseState = PlayerBaseState.Crouching;
+	void StopCrouch(InputAction.CallbackContext context) => _baseState = PlayerBaseState.Standing;
 
-	void OnTriggerEnter(Collider other)
+	void Jump(InputAction.CallbackContext context)
 	{
-		if (other.CompareTag("Water")) _inWater = true;
+		if (!_motor.GroundingStatus.IsStableOnGround) return;
+
+		_jumping = true;
 	}
 
-	void OnTriggerExit(Collider other)
+	public Vector2 GetMoveInput() => _player.Controls.Movement.Movement.ReadValue<Vector2>();
+
+	public void BeforeCharacterUpdate(float deltaTime)
 	{
-		if (other.CompareTag("Water"))
-		{
-			SetState(Fall);
-			_inWater = false;
-		}
+	}
+
+	public void PostGroundingUpdate(float deltaTime)
+	{
+	}
+
+	public void AfterCharacterUpdate(float deltaTime)
+	{
+	}
+
+	public bool IsColliderValidForCollisions(Collider coll)
+	{
+		return true;
+	}
+
+	public void OnGroundHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
+	{
+	}
+
+	public void OnMovementHit(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, ref HitStabilityReport hitStabilityReport)
+	{
+	}
+
+	public void ProcessHitStabilityReport(Collider hitCollider, Vector3 hitNormal, Vector3 hitPoint, Vector3 atCharacterPosition, Quaternion atCharacterRotation, ref HitStabilityReport hitStabilityReport)
+	{
+	}
+
+	public void OnDiscreteCollisionDetected(Collider hitCollider)
+	{
 	}
 }
+public enum PlayerBaseState { Standing, Crouching }
+public enum PlayerMovementState { Walking, Running }

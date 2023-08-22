@@ -1,3 +1,5 @@
-﻿public interface IInteractor
+﻿using UnityEngine;
+
+public interface IInteractor
 {
 }

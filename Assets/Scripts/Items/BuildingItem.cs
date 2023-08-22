@@ -9,7 +9,7 @@ public class BuildingItem : Item
 
 	protected override void OnInitialize()
 	{
-		_cameraHolder = _player.CameraHolder;
+		_cameraHolder = _player.Controller.CameraHolder;
 	}
 
 	void Update()

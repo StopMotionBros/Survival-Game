@@ -3,7 +3,7 @@ using UnityEngine;
 
 public class ItemHolder : MonoBehaviour
 {
-	[SerializeField] PlayerController _player;
+	[SerializeField] Player _player;
 	PlayerInventory _inventory;
 
 	Dictionary<UIItemSlot, Item> _items = new();

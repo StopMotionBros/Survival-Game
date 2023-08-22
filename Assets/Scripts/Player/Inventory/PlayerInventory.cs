@@ -6,13 +6,13 @@ public class PlayerInventory : MonoBehaviour
 {
 	public Inventory Inventory => _inventory;
 
-	[SerializeField] PlayerController _player;
+	[SerializeField] Player _player;
     [SerializeField] Inventory _inventory;
 	[SerializeField] GameObject _content;
 
 	[Space]
 
-	[SerializeField] ContextMenu _contextMenu;
+	[SerializeField] UIContextMenu _contextMenu;
 	[SerializeField] Crafting _crafting;
 
 	bool _open;
@@ -28,7 +28,7 @@ public class PlayerInventory : MonoBehaviour
 		_inventory.OnSlotSelected += i => OnSlotSelected?.Invoke(i);
 
 		_inventory.OnSlotRightClick += _contextMenu.SelectSlot;
-		_inventory.SetUser(_player.Orientation);
+		_inventory.SetUser(_player.Controller.Orientation);
 
 		_crafting.SetContainer(this);
 	}
@@ -43,7 +43,7 @@ public class PlayerInventory : MonoBehaviour
 	#region Input Setup
 	void OnEnable()
 	{
-		if (_player.PlayerControls == null) return;
+		if (_player.Controls == null) return;
 
 		SubscribeInputs();
 	}
@@ -55,12 +55,12 @@ public class PlayerInventory : MonoBehaviour
 
 	void SubscribeInputs()
 	{
-		_player.PlayerControls.UI.ToggleInventory.performed += ToggleInventory;
+		_player.Controls.UI.ToggleInventory.performed += ToggleInventory;
 	}
 
 	void UnsubscribeInputs()
 	{
-		_player.PlayerControls.UI.ToggleInventory.performed -= ToggleInventory;
+		_player.Controls.UI.ToggleInventory.performed -= ToggleInventory;
 	}
 	#endregion
 
@@ -80,19 +80,20 @@ public class PlayerInventory : MonoBehaviour
 
 		if (!open)
 		{
-			_player.PlayerControls.Movement.Enable();
-			_player.PlayerControls.Camera.Enable();
-			_player.PlayerControls.Interaction.Enable();
+			_player.Controls.Movement.Enable();
+			_player.Controls.Camera.Enable();
+			_player.Controls.Interaction.Enable();
 			_crafting.CloseRecipe();
 			_crafting.Toggle(false);
 		}
 		else
 		{
-			_player.PlayerControls.Movement.Disable();
-			_player.PlayerControls.Camera.Disable();
-			_player.PlayerControls.Interaction.Enable();
+			_player.Controls.Movement.Disable();
+			_player.Controls.Camera.Disable();
+			_player.Controls.Interaction.Enable();
 		}
 	}
 
-	public Vector3 GetDropPosition() => _player.Orientation.position + _player.Orientation.forward + Vector3.up;
+	public Vector3 GetDropPosition() => 
+		_player.Controller.Orientation.position + _player.Controller.Orientation.forward + Vector3.up;
 }
